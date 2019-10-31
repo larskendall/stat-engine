@@ -23,6 +23,7 @@ import makeWebpackConfig from './webpack.make';
 import b2v from 'buffer-to-vinyl';
 import moment from 'moment-timezone';
 import seedDev from './server/config/seedDev'
+import {exec} from 'child_process'
 
 var plugins = gulpLoadPlugins();
 var config;
@@ -97,6 +98,12 @@ function whenServerReady(cb) {
         100);
 }
 
+function handleMochaError(err) {
+    // Catch test errors so that we can show a clean error message without a useless stack.
+    console.error(`${err.message}\n`);
+    this.emit('end');
+}
+
 /********************
  * Reusable pipelines
  ********************/
@@ -145,6 +152,7 @@ let mocha = lazypipe()
     .pipe(plugins.mocha, {
         reporter: 'spec',
         timeout: 5000,
+        exit: true,
         require: [
             './mocha.conf'
         ]
@@ -479,14 +487,39 @@ gulp.task('test:server', cb => {
         cb);
 });
 
+gulp.task('test:server:unit', cb => {
+    runSequence(
+        'test:createdb',
+        'env:all',
+        'env:test',
+        'mocha:unit',
+        cb);
+});
+
+gulp.task('test:server:integration', cb => {
+    runSequence(
+        'test:createdb',
+        'env:all',
+        'env:test',
+        'mocha:integration',
+        cb);
+});
+
+gulp.task('test:createdb', cb => {
+  cb();
+  // exec('./test-createdb.sh', cb);
+});
+
 gulp.task('mocha:unit', () => {
     return gulp.src(paths.server.test.unit)
-        .pipe(mocha());
+        .pipe(mocha())
+        .on('error', handleMochaError);
 });
 
 gulp.task('mocha:integration', () => {
     return gulp.src(paths.server.test.integration)
-        .pipe(mocha());
+        .pipe(mocha())
+        .on('error', handleMochaError);
 });
 
 gulp.task('test:server:coverage', cb => {

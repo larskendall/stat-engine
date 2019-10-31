@@ -1,65 +1,52 @@
 'use strict';
 
 import app from '../..';
-import {User} from '../../sqldb';
+import { User } from '../../sqldb';
 import request from 'supertest';
+import supertestSession from 'supertest-session';
+import { buildUser } from '../../test-util/sequelize-test-util';
 
-describe('User API:', function() {
-  var user;
+describe('User API', function() {
+  let user;
 
-  // Clear users before testing
-  before(function() {
-    return User.destroy({ where: {} }).then(function() {
-      user = User.build({
-        name: 'Fake User',
-        email: 'test@example.com',
-        password: 'password'
-      });
-
-      return user.save();
-    });
+  before(async function() {
+    await User.destroy({ where: {} });
+    user = buildUser();
+    await user.save();
   });
 
-  // Clear users after testing
-  after(function() {
-    return User.destroy({ where: {} });
+  after(async function() {
+    await User.destroy({ where: {} });
   });
 
   describe('GET /api/users/me', function() {
-    var token;
+    let session = null;
 
-    before(function(done) {
-      request(app)
-        .post('/auth/local')
+    before(async function() {
+      session = supertestSession(app);
+
+      const res = await session.post('/auth/local')
         .send({
-          email: 'test@example.com',
-          password: 'password'
-        })
-        .expect(200)
-        .expect('Content-Type', /json/)
-        .end((err, res) => {
-          token = res.body.token;
-          done();
+          username: user.username,
+          password: 'password',
         });
+
+      expect(res.statusCode).to.equal(200);
+      expect(res.body.user).to.be.an('object');
+      expect(res.body.user.username).to.equal(user.username);
     });
 
-    it('should respond with a user profile when authenticated', function(done) {
-      request(app)
-        .get('/api/users/me')
-        .set('authorization', `Bearer ${token}`)
-        .expect(200)
-        .expect('Content-Type', /json/)
-        .end((err, res) => {
-          expect(res.body._id.toString()).to.equal(user._id.toString());
-          done();
-        });
+    it('should respond with a user profile when authenticated', async function() {
+      const res = await session.get('/api/users/me');
+
+      expect(res.statusCode).to.equal(200);
+      expect(res.body.user).to.be.an('object');
+      expect(res.body.user.username).to.equal(user.username);
     });
 
-    it('should respond with a 401 when not authenticated', function(done) {
-      request(app)
-        .get('/api/users/me')
-        .expect(401)
-        .end(done);
+    it('should respond with a 401 when not authenticated', async function() {
+      const res = await request(app).get('/api/users/me');
+      expect(res.statusCode).to.equal(401);
     });
   });
 });
