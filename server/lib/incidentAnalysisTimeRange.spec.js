@@ -2,6 +2,7 @@ import {
   previousTimeRange,
   IncidentAnalysisTimeRange
 } from './incidentAnalysisTimeRange';
+import { Log } from '../util/log';
 
 describe('incidentAnalysisTimeRange', function() {
   describe('previousTimeRange()', function() {
