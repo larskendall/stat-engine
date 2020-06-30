@@ -1,0 +1,38 @@
+<div class="emails-home">
+  <div class="br-pageheader">
+    <nav class="breadcrumb">
+      <a class="breadcrumb-item" ui-sref="site.user.home">Home</a>
+      <a class="breadcrumb-item active" ui-sref="site.emails.home">Emails</a>
+    </nav>
+  </div>
+
+  <div class="br-pagetitle d-flex justify-content-between flex-wrap">
+    <h2 class="m-0 mr-3">Emails</h2>
+    <button class="btn btn-primary" ng-click="vm.create()">Create New</button>
+  </div>
+
+  <div class="br-pagebody">
+    <loading-overlay ng-if="vm.isLoading" show-spinner="true"></loading-overlay>
+
+    <section>
+      <div ng-if="vm.emails.length > 0">
+        <ul>
+          <li
+            class="email-card shadow-sm"
+            ng-repeat="email in vm.emails"
+            ng-click="vm.select($event, email)"
+          >
+            <h5 class="heavyheader text-truncate">{{ email.name }}</h5>
+            <p>{{ email.description }}</p>
+          </li>
+        </ul>
+      </div>
+
+      <div ng-if="vm.emails.length === 0">
+        <h6 class="tx-semibold">
+          No emails available! <a ng-click="vm.create()" href="#">Create</a> one now.
+        </h6>
+      </div>
+    </section>
+  </div>
+</div>

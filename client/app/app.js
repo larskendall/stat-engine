@@ -32,6 +32,7 @@ import sparkline from 'jquery-sparkline/jquery.sparkline.js';
 import 'angular-filter-count-to/dist/angular-filter-count-to.min.js';
 import 'angular-moment';
 import 'hammerjs';
+import 'angular-legacy-sortablejs-maintained/angular-legacy-sortable';
 import MapBoxGL from 'mapbox-gl';
 
 import '../polyfills';
@@ -66,10 +67,9 @@ import exposure from './exposure';
 import report from './report';
 import incident from './incident';
 import erf from './effective-response-force';
-
 import workspace from './workspace';
-
 import marketplace from './marketplace';
+import emails from './emails';
 
 // global components
 import appbar from '../components/appbar/appbar.component';
@@ -169,6 +169,7 @@ angular.module('statEngineApp', [
   moveUpMap,
   exposure,
   'ui.bootstrap',
+  'ng-sortable',
   footer,
   main,
   analyticEventConstants,
@@ -194,7 +195,8 @@ angular.module('statEngineApp', [
   erf,
   treeSelect,
   autoComplete,
-  subscriptionBanner
+  subscriptionBanner,
+  emails,
 ])
   .config(routeConfig)
   .config(buildConfig => {

@@ -1,0 +1,45 @@
+<div class="emails-edit">
+  <div class="br-pageheader">
+    <nav class="breadcrumb">
+      <a class="breadcrumb-item" ui-sref="site.user.home">Home</a>
+      <a class="breadcrumb-item" ui-sref="site.emails.home">Emails</a>
+      <a class="breadcrumb-item active" ui-sref="site.emails.edit">{{ vm.pageTitle }}</a>
+    </nav>
+  </div>
+
+  <div class="br-pagetitle d-flex justify-content-between flex-wrap">
+    <h2 class="m-0 mr-3">{{ vm.pageTitle }}</h2>
+  </div>
+
+  <div class="br-pagebody">
+    <loading-overlay ng-if="vm.isLoading" show-spinner="true"></loading-overlay>
+
+    <section class="email-editor">
+      <ul
+        class="email-sections-list"
+        ng-sortable="{forceFallback: true}"
+      >
+        <li
+          class="email-section"
+          ng-repeat="emailSection in vm.emailSections"
+          ng-click="vm.emailSectionClicked(emailSection)"
+        >
+          <div class="email-section-name">{{ emailSection.name }}</div>
+        </li>
+      </ul>
+    </section>
+  </div>
+
+  <div class="overlay-window" ng-class="{'active': (vm.overlay === 'emailSection')}">
+    <div class="overlay-window-header">
+      <div class="overlay-window-header-title">
+        <span>{{ vm.selectedEmailSection.name }}</span>
+      </div>
+      <button class="close-button" ng-click="vm.hideOverlay()"></button>
+    </div>
+
+    <div class="overlay-window-content">
+      <h3>Stuff</h3>
+    </div>
+  </div>
+</div>

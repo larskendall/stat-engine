@@ -1909,7 +1909,7 @@ nav.section-nav {
 
   .checkbox > label {
     display: flex;
-    
+
     span {
       margin-left: 5px;
     }
@@ -2010,6 +2010,7 @@ input:checked + .slider:before {
 @import 'marketplace/marketplace';
 @import 'workspace/workspace';
 @import 'statEngine/statEngine';
+@import 'emails/emails';
 @import '../components/footer/footer';
 @import '../components/modal/modal';
 @import '../components/navbar/navbar';

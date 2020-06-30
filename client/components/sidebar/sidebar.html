@@ -88,7 +88,7 @@
         </li>
         <li class="br-menu-item">
           <a href="" ui-sref='site.user.settings' class="br-menu-link" ng-class="{ active: vm.$state.current.name == 'site.user.settings' }">
-            <i class="menu-item-icon fa fa-gear tx-22"></i>
+            <i class="menu-item-icon fa fa-gear tx-20"></i>
             <span class="menu-item-label text-truncate">Settings</span>
           </a>
         </li>
@@ -98,15 +98,21 @@
       <label ng-show="vm.user.isDepartmentAdmin || vm.user.isDepartmentAdmin" class="sidebar-label pd-x-25 mg-t-20 op-3">Admin</label>
       <ul class="br-sideleft-menu">
         <li class="br-menu-item">
-          <a href="#" ui-sref="site.admin.home" class="br-menu-link" ng-show="vm.user.isAdmin">
+          <a href="#" ui-sref="site.admin.home" class="br-menu-link" ng-show="vm.user.isAdmin"  ng-class="{ active: vm.$state.current.name == 'site.admin.home' }">
             <i class="menu-item-icon fa fa-fire tx-22"></i>
             <span class="menu-item-label text-truncate">Fire Departments</span>
           </a>
         </li>
         <li class="br-menu-item" ng-show="vm.user.isDepartmentAdmin">
-          <a href="#" ui-sref="site.departmentAdmin.home" class="br-menu-link">
+          <a href="#" ui-sref="site.departmentAdmin.home" class="br-menu-link"  ng-class="{ active: vm.$state.current.name == 'site.departmentAdmin.home' }">
             <i class="menu-item-icon fa fa-users tx-16"></i>
             <span class="menu-item-label text-truncate">My Department</span>
+          </a>
+        </li>
+        <li class="br-menu-item" ng-show="vm.user.isDepartmentAdmin">
+          <a href="#" ui-sref='site.emails.home' class="br-menu-link" ng-class="{ active: vm.$state.current.name == 'site.emails.home' }">
+            <i class="menu-item-icon fa fa-envelope tx-20"></i>
+            <span class="menu-item-label text-truncate">Emails</span>
           </a>
         </li>
         <li class="br-menu-item" ng-show="vm.user.isDepartmentAdmin">
