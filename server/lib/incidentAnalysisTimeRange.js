@@ -35,6 +35,24 @@ export function computePercentChange(newVal, oldVal) {
   return _.round((newVal - oldVal) / oldVal * 100, 2);
 }
 
+export function buildEmailQuery(emailConfig) {
+  for (const sectionConfig of emailConfig.sections) {
+    // TODO
+  }
+}
+
+function buildIncidentSummary(sectionConfig) {
+  // TODO
+}
+
+function buildUnitSummary(sectionConfig) {
+  // TODO
+}
+
+function buildBattalionSummary(sectionConfig) {
+  // TODO
+}
+
 export function buildFireIncidentQuery(timeFilter) {
   return bodybuilder()
     .filter('term', 'description.suppressed', false)
