@@ -2,6 +2,7 @@
 
 import moment from 'moment-timezone';
 import _ from 'lodash';
+import bodybuilder from 'bodybuilder';
 import { FirecaresLookup } from '@statengine/shiftly';
 
 import { sendEmail } from './mandrill';
@@ -17,6 +18,111 @@ import config from '../../config/environment';
 import { TimeUnit } from '../../components/constants/time-unit';
 import { BadRequestError, InternalServerError } from '../../util/error';
 import { Log } from '../../util/log';
+import { registerPartials } from '../../util/email';
+import esConnection from '../../elasticsearch/connection';
+
+async function getDataForEmail(fireDepartment, emailConfig) {
+  // Build queries.
+  const queries = [];
+  for (const section of emailConfig.sections) {
+    let query;
+    switch (section.type) {
+    case 'incident-summary':
+      query = buildIncidentSummaryQuery();
+      break;
+    case 'unit-summary':
+      continue;
+      // query = buildUnitSummaryQuery();
+      // break;
+    default:
+      throw new Error(`Unrecognized section type '${section.type}'`);
+    }
+
+    queries.push({});
+    queries.push(query);
+  }
+
+  const result = await esConnection.getClient().msearch({
+    index: fireDepartment.es_indices['fire-incident'],
+    body: queries,
+  });
+
+  // Collect data.
+  const sectionsData = [];
+  for (let i = 0; i < result.responses.length; i++) {
+    const response = result.responses[i];
+    const section = emailConfig.sections[i];
+
+    let data;
+    switch (section.type) {
+    case 'incident-summary':
+      data = collectIncidentSummaryData(response);
+      break;
+    case 'unit-summary':
+      continue;
+      // query = buildUnitSummaryQuery();
+      // break;
+    default:
+      throw new Error(`Unrecognized section type '${section.type}'`);
+    }
+
+    sectionsData.push(data);
+  }
+
+  return result;
+  // return { sectionsData };
+}
+
+function buildIncidentSummaryQuery() {
+  return bodybuilder()
+    .filter('term', 'description.suppressed', false)
+    .agg('terms', 'description.category', { size: 3, order: { _term: 'asc' }}, 'incidentsByCategory', categoryAgg => categoryAgg
+      .agg('percentiles', 'durations.turnout.seconds', 'turnoutDurationSecondsPercentile', { percents: 90 })
+      .agg('nested', { path: 'apparatus' }, 'apparatus', agg => agg
+        .agg('terms', 'apparatus.unit_id', { size: 500 }, 'units', unitAgg => unitAgg
+          .agg('percentiles', 'apparatus.extended_data.turnout_duration', 'turnoutDuration', { percents: 90 })
+        )
+        .agg('terms', 'apparatus.agency', { size: 500 }, unitAgg => unitAgg
+          .agg('percentiles', 'apparatus.extended_data.turnout_duration', 'turnoutDuration', { percents: 90 })
+        )
+      )
+    )
+    .size(0)
+    .build();
+}
+
+function collectIncidentSummaryData(response) {
+  const aggs = response.aggregations;
+
+  const incidentsByCategory = aggs.incidentsByCategory.buckets.reduce((acc, bucket) => {
+    acc[bucket.key] = bucket.doc_count;
+  }, {});
+
+  return {
+    'total': response.hits.total,
+    'ems': incidentsByCategory.EMS,
+    'fire': incidentsByCategory.FIRE,
+  }
+}
+
+export async function preview(req, res) {
+  await registerPartials();
+
+  const data = await getDataForEmail(req.fireDepartment, req.body);
+
+  res.json({ data });
+  // const sections = req.body.sections;
+  // const sectionTypes = sections.map(section => section.type);
+  //
+  // await registerSectionPartials(sectionTypes);
+  //
+  // const fileStr = await readFileAsync('../../../email/test.handlebars', 'utf8');
+  // const template = Handlebars.compile(fileStr);
+  //
+  // const html = template({ sections });
+  //
+  // res.json({ html });
+}
 
 export async function sendTimeRangeAnalysis(req, res) {
   const configId = req.query.configurationId;

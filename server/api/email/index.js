@@ -17,6 +17,15 @@ router.post(
   controller.sendTimeRangeAnalysis,
 );
 
+router.post(
+  '/preview',
+  auth.isAuthenticated,
+  auth.hasRole('department_admin'),
+  bodyParser.json(),
+  auth.hasFireDepartment,
+  controller.preview,
+);
+
 module.exports = router;
 
 export default router;
